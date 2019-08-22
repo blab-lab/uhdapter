@@ -1,9 +1,7 @@
 function [ ] = run_uhdapter_audapter(outputdir,expt,bTestMode)
-% Template for altered feedback studies. Based on FUSP template but changed
-% to work with Audapter. 
-%                   outputdir: directory where data is saved
-%                   expt: expt params set up in wrapper function
-%                   h_fig: figure handles for display
+% outputdir: directory where data is saved
+% expt: expt params set up in wrapper function
+% h_fig: figure handles for display
 
 
 if nargin < 1 || isempty(outputdir), outputdir = pwd, end
