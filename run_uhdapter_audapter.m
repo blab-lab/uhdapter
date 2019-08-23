@@ -33,17 +33,10 @@ expt.dataPath = get_exptSavePath('stress','acousticdata',expt.snum);
 expt.gender = get_gender(gender);
 stimtxtsize = 200;
 
-
-% create output directory if it doesn't exist
-%predir = fullfile(outputdir,'pre')
-%if ~exist(predir,'dir')
-%    mkdir(outputdir,'pre')
-%end 
-
 % subjdir = fullfile(outputdir,'acousticdata',num2str(expt.snum))
 if ~exist(expt.dataPath,'dir')
     mkdir(expt.dataPath)
-end 
+end
 
 
 trialdirname = 'temp_trials';
@@ -57,14 +50,6 @@ if ~exist(trialdir,'dir')
     mkdir(trialdir)
 end
 
-%else
-%    practicedir = fullfile(subjdir, 'practice');
-%    ampl_file = fullfile(practicedir,'ampl.mat');
-%    ampdata = load(ampl_file)
-
-
-
-
 %% set up stimuli
 expt.conds = {'noisebase' 'baseline' 'ramp' 'hold' 'post' 'washout'}; % transfer task (to strings)?
 expt.stress = {'trochee' 'iamb'};
@@ -75,19 +60,9 @@ expt.words = {'abate' 'adept' 'above' 'beta' 'meta'}; % data? bud?
 
 %% build up trial list
 
-%expt.allConds(1:ntrials_base) = expt.group;
-%if expt.group == 1
-%    expt.shiftMags(1:ntrials_base) = 0;
-%else
-%    std_baseline_mels = 10;
-%    expt.shiftMags(1:ntrials_base) = std_baseline_mels.*randn(1,ntrials_base);
-%end
 if ~isfield(expt,'startBlock')
     expt.startBlock = 1
 end
-% if ~isfield(expt,'startTrial')
-%     expt.startTrial = 1
-% end
 
 expt.maxshift = 100
 
@@ -118,14 +93,7 @@ end
 
 ramp = linspace(expt.maxshift./nRamp,expt.maxshift,nRamp); %ramped change in F1.
 expt.shiftMags = [ones(1,nNoisebase) ones(1,nBaseline) ramp expt.maxshift.*ones(1,nHold) ones(1,nPost) ones(1,nWash)]; % build up list of formant shifts
-% expt.condbank = 
-% ntrials_alt = length(condbank);
 
-
-
-
-%nbtrials = 30; %length(words)*nbreps;      % number of trials per block
-%ntrials = nbtrials * nblocks;         % total number of trials in expt
 expt.timing.stimdur = 1.75;                          % time stim is on screen, in seconds
 expt.timing.interstimdur = .75;                   % minimum time between stims, in seconds
 expt.timing.interstimjitter = .75;                % maximum extra time between stims (jitter)
@@ -142,26 +110,7 @@ expt.nblocks = expt.ntrials ./ expt.ntrials_per_block;
 expt.allConds = [ones(1,nNoisebase) 2.*ones(1,nBaseline) 3.*ones(1,nRamp) 4.*ones(1,nHold) 5.*ones(1,nPost) 6.*ones(1,nWash)];
 expt.listConds = expt.conds(expt.allConds); % vector with the condition indexed by the number in allConds
 
-% %% one way to set this up is to randomize by phase
-
-% banobank = repmat(1:length(expt.words),1,expt.nNoisebase/length(expt.words))
-% basebank = repmat(1:length(expt.words),1,expt.nBaseline/length(expt.words))
-% rampbank = repmat(1:length(expt.words),1,expt.nRamp/length(expt.words))
-% holdbank = repmat(1:length(expt.words),1,expt.nHold/length(expt.words))
-% postbank = repmat(1:length(expt.words),1,expt.nPost/length(expt.words))
-% washbank = repmat(1:length(expt.words),1,expt.nWash/length(expt.words))
-
-
-% banorp = randperm(nNoisebase); % hack with expt. vs not in order to get lengths of banks right when bTest=0
-% baserp = randperm(nBaseline);
-% ramprp = randperm(nRamp);
-% holdrp = randperm(nHold);
-% postrp = randperm(nPost);
-% 
-% wordbank = [banobank basebank rampbank holdbank postbank]
-% rp = [banorp baserp ramprp holdrp postrp]
-
-%% or we can randomize by block
+%% randomize by block
 
 expt.listWords = []
 expt.allWords = []
@@ -175,14 +124,7 @@ for rb = 1:expt.nblocks
 end
 
 
-
-% expt.allWords = wordbank(rp); % indices of words in order they will be presented
-% expt.listWords = expt.words(expt.allWords); % words corresponding to the indices
-
-%for w=1:length(expt.words)
-%    expt.vowels{w} = txt2ipa(expt.words{w});
-%end % loop defeats purpose of txt2ipa!
-expt.listVowels = txt2ipa(expt.listWords) 
+expt.listVowels = txt2ipa(expt.listWords)
 
 % many:1 word:vowel mapping
 for t=1:expt.ntrials
@@ -205,15 +147,13 @@ expt.listNoise = [2.*ones(1,(nNoisebase)) 3.*ones(1,(nBaseline+nRamp+nHold)) 2.*
 % set missing expt fields to defaults
 expt = set_exptDefaults(expt);
 
-% defaults I think overwrites inds
-
 expt.inds = get_exptInds(expt,{'conds', 'words', 'vowels', 'stress'});
 
-% save expt 
+% save expt
 if bTestMode
-save(fullfile(expt.dataPath,'practice','expt.mat'),'expt')
+    save(fullfile(expt.dataPath,'practice','expt.mat'),'expt')
 else
-save(fullfile(expt.dataPath,'expt.mat'), 'expt')
+    save(fullfile(expt.dataPath,'expt.mat'), 'expt')
 end
 
 %% set up audapter
@@ -229,20 +169,12 @@ p.bShift = 1;
 p.bRatioShift = 0;
 p.bMelShift = 1;
 
-% set noise
-%noiseWavFN = 'mtbabble48k.wav';
-%w = get_noiseSource(noiseWavFN,p);
+
+
 w = get_noiseSource(p);
-%p.datapb = w; %was: 
 Audapter('setParam', 'datapb', w, 1);
-p.fb = 3;          % set feedback mode to 3: speech + noise; 2 = noise-masking feedback; 4 = speech-shaped. Noise has been measured at 77. [76 using connector and 1 notch left of center on headphone output]
-% for use with connector (F/F 0.25in)
-%p.fb3Gain = 0.01; % gain for noise waveform. Turn headphone nob to one notch left of dead center.
-% for use without connector
-%p.fb3Gain = 0.07;   % gain for noise waveform. Changed to .07 so that when the meter is turned down to two notches to left of dead center, sound meter reads ~56.
-% p.fb3Gain = 0.06; % gain when plugged directly into focusrite in 544a.
-%p.fb3Gain = 0.08; % current as of 9/20/18 with amp set one notch left of center.
-% in 544a, set headphone level to 9 o'clock
+p.fb = 3;          % set feedback mode to 3: speech + noise; 2 = noise-masking feedback; 4 = speech-shaped. Noise has been measured at 77. 
+
 p.fb3Gain = 0.014; % in current setup where headphones are plugged into socket 3 with knob at 3 o'clock
 p.fb2Gain = 0.16; % 77
 
@@ -262,30 +194,28 @@ h_ready = draw_exptText(h_fig,.5,.5,expt.instruct.introtxt,expt.instruct.txtpara
 pause
 delete_exptText(h_fig,h_ready)
 
-    
+
 
 
 % run trials
 
-    for iblock = expt.startBlock:expt.nblocks
-        pause(1);
-        if iblock == expt.startBlock
-            startTrial = mod(expt.startTrial,expt.ntrials_per_block);
-            if ~startTrial, startTrial = expt.ntrials_per_block; end
-        else
-            startTrial = 1;
-        end
-
-
-% for iblock = 1:expt.nblocks                 % for each block
-%     pause(1)
-     for itrial = startTrial:expt.ntrials_per_block   % for each trial
-%         % pause if 'p' is pressed
+for iblock = expt.startBlock:expt.nblocks
+    pause(1);
+    if iblock == expt.startBlock
+        startTrial = mod(expt.startTrial,expt.ntrials_per_block);
+        if ~startTrial, startTrial = expt.ntrials_per_block; end
+    else
+        startTrial = 1;
+    end
+    
+    
+    for itrial = startTrial:expt.ntrials_per_block   % for each trial
+        %         % pause if 'p' is pressed
         if get_pause_state(h_fig,'p')
             pause_trial(h_fig);
         end
-
-        % set trial index    
+        
+        % set trial index
         trial_index = (iblock-1).* expt.ntrials_per_block + itrial;
         
         % plot trial number in experimenter view
@@ -293,12 +223,12 @@ delete_exptText(h_fig,h_ready)
         ctrltxt = sprintf('trial: %d/%d, cond: %s',trial_index,expt.ntrials,expt.listConds{trial_index});
         h_trialn = text(h_sub(1),0,0.5,ctrltxt,'Color','black', 'FontSize',30, 'HorizontalAlignment','center');
         
-        % set new perturbation   
+        % set new perturbation
         p.pertAmp = expt.shiftMags(trial_index) * ones(1, 257);
         p.pertPhi = expt.shiftAngles(trial_index) * ones(1, 257);
         Audapter('setParam','pertAmp',p.pertAmp)
         Audapter('setParam','pertPhi',p.pertPhi) % I seem to remember you can set multiple params in one line -- test this
-
+        
         % set noise
         if p.fb ~= expt.listNoise(trial_index)
             p.fb = expt.listNoise(trial_index)
@@ -306,11 +236,11 @@ delete_exptText(h_fig,h_ready)
             % initialize Audapter
             AudapterIO('init',p);
         end
-
-        % run trial in Audapter        
+        
+        % run trial in Audapter
         Audapter('reset'); %reset Audapter
         Audapter('start'); %start trial
-    
+        
         % display stimulus
         txt2display = expt.listWords{trial_index};
         color2display = expt.colorvals{expt.allColors(trial_index)};
@@ -321,14 +251,8 @@ delete_exptText(h_fig,h_ready)
         Audapter('stop');
         
         % get data
-        data = AudapterIO('getData'); 
-        
-        % plot duration feedback
-        %temp changes while plot duration feedback is being fixed
-        %h_dur = plot_duration_feedback(h_fig(stim), data, expt.durcalc); % original line
-        
-        %circ_pos = [.45,.1,.1,.1];%define location and size of circle
-
+        data = AudapterIO('getData');
+ 
         figure(h_fig(stim)) % change this later once it's fixed
         h_dur = rectangle%('Position',circ_pos,'Curvature',[1,1],'Facecolor', 'g');
         CloneFig(h_fig(stim),h_fig(dup))
@@ -336,8 +260,8 @@ delete_exptText(h_fig,h_ready)
         
         % clear screen
         delete_exptText(h_fig,[h_text h_dur])
-        clear h_text h_dur 
-
+        clear h_text h_dur
+        
         % plot shifted spectrogram
         figure(h_fig(ctrl))
         subplot(h_sub(2))
@@ -345,13 +269,12 @@ delete_exptText(h_fig,h_ready)
         tAxis = 0 : p.frameLen : p.frameLen * (size(data.fmts, 1) - 1);
         plot(tAxis/data.params.sr,data.fmts(:, 1 : 2), 'b');
         plot(tAxis/data.params.sr,data.sfmts(:, 1 : 2), 'g');
-
+        
         % pause for viewing duration feedback
         pause(expt.timing.visualfbdur);
         
         % clear screen
-%        delete_exptText([h_text h_dur])
-        clear h_text h_dur 
+        clear h_text h_dur
         
         % add intertrial interval
         pause(expt.timing.interstimdur);
@@ -389,9 +312,9 @@ clear data
 data = alldata;
 
 if bTestMode
-save(fullfile(expt.dataPath,'practice','data.mat'),'data')
+    save(fullfile(expt.dataPath,'practice','data.mat'),'data')
 else
-save(fullfile(expt.dataPath,'data.mat'), 'data')
+    save(fullfile(expt.dataPath,'data.mat'), 'data')
 end
 
 % remove temp trial directory
